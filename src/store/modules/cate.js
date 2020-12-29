@@ -1,5 +1,5 @@
 import {reqcateList} from "@/utils/http"
-import {successAlert} from "@/utils/alert"
+
 
 let state = {
     list:[]
@@ -21,11 +21,9 @@ let actions={
     reqList(context,user){
         reqcateList(user).then(res=>{
             if(res.data.code==200){
-                successAlert(res.data.msg)
                 context.commit('changeList',res.data.list)
             }
-        })
-        
+        })  
     }
 }
 
@@ -34,5 +32,5 @@ export default {
     mutations,
     getters,
     actions,
-    namescaped:true
+    namespaced:true
 }

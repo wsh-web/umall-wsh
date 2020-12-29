@@ -21,7 +21,7 @@ export default {
   data() {
     return {
       info: {
-        ishow: true,
+        ishow: false,
         isAdd: true,
       },
       list: [],

@@ -2,7 +2,7 @@ import axios from 'axios'
 import qs from 'qs'
 import Vue from 'vue'
 
-import { failAlert } from '@/utils/alert'
+import { erroralert } from '@/utils/alert'
 Vue.prototype.$pre = "http://localhost:3000"
 let baseUrl = "/api"
 
@@ -20,7 +20,7 @@ axios.interceptors.response.use(res => {
     console.log("这是响应拦截的数据" + res.config.url);
     console.log(res);
     if (res.data.code !== 200) {
-        failAlert(res.data.msg)
+        erroralert(res.data.msg)
     }
 
     return res
@@ -441,3 +441,59 @@ export let reqSpecsDel = (id)=>{
 }
 
 //==============商品规格管理end==============
+
+/************商品管理 start**************************/
+
+//添加 user={}
+export let reqgoodsAdd = (user) => {
+
+    return axios({
+        url: baseUrl + "/api/goodsadd",
+        method: "post",
+        data: dataToFormData(user)
+    })
+}
+
+//列表 p={page:1,size:500}
+export let reqgoodslist = (p) => {
+    return axios({
+        url: baseUrl + "/api/goodslist",
+        params: p
+    })
+}
+
+//详情 user={id:1}
+export let reqgoodsDetail = (user) => {
+    return axios({
+        url: baseUrl + "/api/goodsinfo",
+        method: "get",
+        params: user
+    })
+}
+
+//修改 user={id:"必填",img:file,goodsname:""}
+export let reqgoodsUpdate = (user) => {
+    return axios({
+        url: baseUrl + "/api/goodsedit",
+        method: "post",
+        data: dataToFormData(user)
+    })
+}
+
+//删除 user={id:1}
+export let reqgoodsDel = (user) => {
+    return axios({
+        url: baseUrl + "/api/goodsdelete",
+        method: "post",
+        data: qs.stringify(user)
+    })
+}
+
+//总数
+export let reqgoodsCount = () => {
+    return axios({
+        url: baseUrl + "/api/goodscount"
+    })
+}
+
+/************商品管理 end**************************/

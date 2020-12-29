@@ -11,7 +11,7 @@ export let successAlert = (msg) => {
       });
 }
 
-export let failAlert = (msg) => {
+export let erroralert = (msg) => {
     vm.$message({
         showClose: true,
         message: msg,
