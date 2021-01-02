@@ -1,18 +1,25 @@
 import axios from 'axios'
 import qs from 'qs'
 import Vue from 'vue'
-
+import store from  "../store"
 import { erroralert } from '@/utils/alert'
+import router from "@/router"
+
 Vue.prototype.$pre = "http://localhost:3000"
 let baseUrl = "/api"
 
 
+// Vue.prototype.$pre=""
+// let baseUrl=""
 
-// axios.interceptors.request.use(req=>{
-//     if(req.config.url!=='/login' ){
-//         req.headers.authorization=JSON.parse(sessionStorage.getItem('userInfo')).token
-//     }   
-// })
+
+
+axios.interceptors.request.use(config=>{
+    if(config.url!=baseUrl+"/api/userlogin"){
+        config.headers.authorization=store.state.userInfo.token
+    }
+    return config
+})
 
 
 
@@ -21,6 +28,15 @@ axios.interceptors.response.use(res => {
     console.log(res);
     if (res.data.code !== 200) {
         erroralert(res.data.msg)
+    }
+    if (!res.data.list) {
+        res.data.list = []
+    }
+    if(res.data.msg==="登录已过期或访问权限受限"){
+        
+        store.dispatch("changeUser",{})
+        
+        router.push("/login")
     }
 
     return res
@@ -35,7 +51,15 @@ function dataToFormData (obj){
     return data
 } 
 
+//=======================登录管理===================
 
+export let  reqLogin = (obj)=>{
+    return axios({
+        url:baseUrl+"/api/userlogin",
+        method:"post",
+        data:qs.stringify(obj)
+    })
+}
 
 // ======================菜单管理===================
 
@@ -208,13 +232,11 @@ export let reqManageEdit = (obj) => {
 
 //管理员删除
 
-export let reqManageDel = (id) => {
+export let reqManageDel = (obj) => {
     return axios({
-        uir: baseUrl + '/api/userdelete',
+        url: baseUrl + '/api/userdelete',
         method: 'post',
-        data: qs.stringify({
-            uid: id
-        })
+        data: qs.stringify(obj)
     })
 }
 
@@ -497,3 +519,53 @@ export let reqgoodsCount = () => {
 }
 
 /************商品管理 end**************************/
+
+
+//==================限时秒杀管理start==============
+
+
+//添加
+export let reqSkillAdd = (obj)=>{
+    return axios({
+        url:baseUrl+"/api/seckadd",
+        method:"post",
+        data:qs.stringify(obj)
+    })
+}
+
+//列表
+export let reqSkillList = ()=>{
+    return axios({
+        url:baseUrl+"/api/secklist",
+    })
+}
+
+//获取一条
+
+
+export let reqSkillGetOne = (id)=>{
+    return axios({
+        url:baseUrl+"/api/seckinfo",
+        params:{id:id}
+    })
+}
+
+//修改
+export let reqSkillEdit = (obj)=>{
+    return axios({
+        url:baseUrl+"/api/seckedit",
+        method:"post",
+        data:qs.stringify(obj)
+    })
+}
+
+//删除
+export let reqSkillDel = (id)=>{
+    return axios({
+        url:baseUrl+"/api/seckdelete",
+        method:"post",
+        data:qs.stringify({id:id})
+    })
+}
+
+

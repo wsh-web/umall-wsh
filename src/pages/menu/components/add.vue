@@ -89,7 +89,7 @@
 <script>
 import { indexRoutes } from "@/router";
 import { reqMenuAdd, reqMenuGetOne, reqMenuEdit } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert,erroralert } from "@/utils/alert";
 export default {
   props: ["info", "list"],
   data() {
@@ -130,8 +130,26 @@ export default {
         url: "",
       };
     },
+    checkProps(){
+      return new Promise(reslove=>{
+        if(this.user.title==""){
+          erroralert("菜单名称不能为空")
+          return
+        }
+        if(this.user.pid==0 && this.user.icon =="" ){
+          erroralert("顶级菜单图标不能为空")
+          return
+        }
+        if(this.user.pid!=0 && this.user.url ==""){
+          erroralert("子菜单地址不能为空")
+          return
+        }
+        reslove()
+      })
+    },
     add() {
-      reqMenuAdd(this.user).then((res) => {
+     this.checkProps().then(()=>{
+        reqMenuAdd(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -139,6 +157,7 @@ export default {
           this.$emit("init");
         }
       });
+     })
     },
     changePid() {
       if (this.user.pid == 0) {
@@ -156,13 +175,16 @@ export default {
       });
     },
     update() {
-      reqMenuEdit(this.user).then((res) => {
+      this.checkProps().then(()=>{
+        reqMenuEdit(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.info.ishow = false;
           this.$emit("init");
         }
       });
+      })
+      
     },
   },
 };

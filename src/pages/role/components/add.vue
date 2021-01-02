@@ -1,15 +1,15 @@
 <template>
   <div>
-    <el-dialog
-      :title="info.isAdd ? '添加角色' : '修改角色'"
+    <!-- <el-dialog
+      :title="info.isadd ? '添加角色' : '修改角色'"
       :visible.sync="info.ishow"
       @closed="cancel"
-    >
+    > -->
+     <el-dialog :title="info.isAdd?'添加角色':'编辑角色'" :visible.sync="info.ishow" @closed="cancel">
       <el-form :model="user">
         <el-form-item label="角色名称" label-width="120px">
           <el-input v-model="user.rolename" autocomplete="off"></el-input>
         </el-form-item>
-        {{ user }}
         <el-form-item label="角色权限" label-width="120px">
           <el-tree
             :data="Menulist"
@@ -46,7 +46,7 @@
 
 <script>
 import { reqRoleAdd, reqMenuList, reqRoleOne, reqRoleEdit } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert, erroralert } from "@/utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -74,15 +74,30 @@ export default {
       };
       this.$refs.tree.setCheckedKeys([]);
     },
-    add() {
-      this.user.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
-      reqRoleAdd(this.user).then((res) => {
-        if (res.data.code == 200) {
-          successAlert(res.data.msg);
-          this.cancel();
-          this.empty();
-          this.$emit("init");
+    checkProps() {
+      return new Promise((resolve) => {
+        if (this.user.rolename == "") {
+          erroralert("角色名称不能为空");
+          return;
         }
+        if (this.$refs.tree.getCheckedKeys().length == 0) {
+          erroralert("请选择角色权限");
+          return;
+        }
+        resolve();
+      });
+    },
+    add() {
+      this.checkProps().then(() => {
+        this.user.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+        reqRoleAdd(this.user).then((res) => {
+          if (res.data.code == 200) {
+            successAlert(res.data.msg);
+            this.cancel();
+            this.empty();
+            this.$emit("init");
+          }
+        });
       });
     },
     getOne(id) {
@@ -95,17 +110,22 @@ export default {
       });
     },
     edit() {
-      this.user.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
-      reqRoleEdit(this.user).then((res) => {
-        if (res.data.code == 200) {
+      this.checkProps().then(() => {
+        this.user.menus = JSON.stringify(this.$refs.tree.getCheckedKeys());
+        reqRoleEdit(this.user).then((res) => {
+          if (res.data.code == 200) {
             successAlert(res.data.msg);
-          this.cancel();
-        
-          this.empty();
-          
-          this.$emit("init");
-          // this.info.isAdd = true
-        }
+             if (this.user.id == this.userInfo.roleid) {
+            this.changeUser({});
+            this.$router.push("/login");
+            return;
+          }
+            this.cancel();
+            this.empty();
+            this.$emit("init");
+            // this.info.isAdd = true
+          }
+        });
       });
     },
   },

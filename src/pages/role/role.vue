@@ -27,6 +27,7 @@ export default {
   methods:{
     willAdd(){
       this.info.ishow=true
+      this.info.isAdd=true
     },
     init(){
       this.$refs.list.init()

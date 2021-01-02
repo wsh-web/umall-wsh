@@ -37,7 +37,7 @@ export default {
       this.$emit("edit", uid);
     },
     del(uid) {
-      reqManageDel(uid).then((res) => {
+      reqManageDel({uid:uid}).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.$emit("init");

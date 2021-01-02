@@ -6,8 +6,6 @@
       @closed="cancel"
     >
       <el-form :model="user">
-        {{ user }}
-
         <el-form-item label="标题" label-width="120px">
           <el-input v-model="user.title" autocomplete="off"></el-input>
         </el-form-item>
@@ -49,7 +47,7 @@
 
 <script>
 import { reqBannerAdd, reqBannerGetOne, reqBannerEdit } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert ,erroralert} from "@/utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -83,8 +81,22 @@ export default {
       this.imageUrl = URL.createObjectURL(file);
       this.user.img = file;
     },
+    checkProps(){
+      return new Promise(resolve=>{
+        if(this.user.title==""){
+          erroralert("标题不能为空")
+          return
+        }
+        if(!this.user.img){
+          erroralert("请上传图片")
+          return
+        }
+        resolve()
+      })
+    },
     add() {
-      reqBannerAdd(this.user).then((res) => {
+      this.checkProps().then(()=>{
+        reqBannerAdd(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -92,6 +104,7 @@ export default {
           this.$emit("init");
         }
       });
+      })  
     },
     getOne(id) {
       reqBannerGetOne(id).then((res) => {
@@ -103,7 +116,8 @@ export default {
       });
     },
     edit() {
-      reqBannerEdit(this.user).then((res) => {
+      this.checkProps().then(()=>{
+          reqBannerEdit(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -111,6 +125,7 @@ export default {
           this.$emit("init");
         }
       });
+      })
     },
   },
 };

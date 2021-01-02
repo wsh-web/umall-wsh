@@ -52,7 +52,7 @@ import {
   reqManageGetOne,
   reqManageEdit,
 } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert,erroralert } from "@/utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -86,8 +86,26 @@ export default {
         status: 1,
       };
     },
+    checkProps(){
+      return new Promise(resolve=>{
+        if(this.form.roleid==""){
+          erroralert("请选择所属角色")
+          return
+        }
+        if(this.form.username==""){
+          erroralert("用户名不能为空")
+          return
+        }
+       resolve()
+      })
+    },
     add() {
-      reqManageAdd(this.form).then((res) => {
+      this.checkProps().then(()=>{
+         if(this.form.password==""){
+          erroralert("用户密码不能为空")
+          return
+        }
+        reqManageAdd(this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -95,6 +113,7 @@ export default {
           this.$emit("init");
         }
       });
+      })
     },
     getOne(uid) {
       reqManageGetOne(uid).then((res) => {
@@ -105,14 +124,16 @@ export default {
       });
     },
     update() {
-      reqManageEdit(this.form).then((res) => {
+      this.checkProps().then(()=>{
+        reqManageEdit(this.form).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
-          this.empty();
           this.cancel();
+          this.empty();
           this.$emit("init");
         }
       });
+      })
     },
   },
   mounted() {

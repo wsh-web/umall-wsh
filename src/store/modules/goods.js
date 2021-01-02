@@ -39,18 +39,17 @@ let actions={
         //bool是true,就要全部；否则，就做分页
         let params=bool?{}:{page:context.state.page,size:context.state.size}
         //发请求
-        console.log(params)
+
         reqgoodslist(params).then(res=>{
             if(res.data.code){
-                //删除的是最后一页的最后一条
-                console.log(res.data.list)
-                // if(res.data.list.length===0&&context.state.page>1){
-                //     context.commit("changePage",context.state.page-1)
-                //     context.dispatch("reqList")
-                //     return;
-                // }
+                // 删除的是最后一页的最后一条
+                // console.log(res.data.list)
+                if(res.data.list.length===0&&context.state.page>1){
+                    context.commit("changePage",context.state.page-1)
+                    context.dispatch("reqList")
+                    return;
+                }
 
-                
                 //修改list
                 context.commit("changeList",res.data.list)
             }

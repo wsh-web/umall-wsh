@@ -41,7 +41,7 @@ import{
   reqMemberGetOne,
   reqMemberEdit
 } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert,erroralert } from "@/utils/alert";
 export default {
   props: ["info"],
   data() {
@@ -76,8 +76,22 @@ export default {
         }
       });
     },
+    checkProps(){
+      return new Promise(resolve=>{
+        if(this.user.phone==""){
+          erroralert("手机号不能为空")
+          return
+        }
+        if(this.user.nickname==""){
+          erroralert("昵称不能为空")
+          return
+        }
+        resolve()
+      })
+    },
     edit() {
-      reqMemberEdit(this.user).then((res) => {
+      this.checkProps().then(()=>{
+        reqMemberEdit(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -85,6 +99,7 @@ export default {
           this.$emit("init");
         }
       });
+      })
     },
   },
 };

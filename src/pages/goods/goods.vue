@@ -5,6 +5,7 @@
     <v-list
       :info="info"
       @edit="edit($event)"
+      @init="init"
     ></v-list>
   </div>
 </template>

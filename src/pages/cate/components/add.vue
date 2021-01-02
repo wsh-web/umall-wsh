@@ -4,9 +4,8 @@
       :title="info.isAdd ? '添加分类' : '修改分类'"
       :visible.sync="info.ishow"
       @closed="cancel"
-    >
+    >{{user}}
       <el-form :model="user">
-        {{ user }}
         <el-form-item label="上级分类" label-width="120px">
           <el-select v-model="user.pid">
             <el-option label="--请选择--" value="" disabled></el-option>
@@ -18,6 +17,7 @@
               :value="item.id"
             ></el-option>
           </el-select>
+         
         </el-form-item>
 
         <el-form-item label="分类名称" label-width="120px">
@@ -66,7 +66,8 @@ import {
   reqcateGetOne,
   reqcateEdit,
 } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { successAlert, erroralert } from "@/utils/alert";
+import {mapGetters,mapActions} from "vuex"
 export default {
   props: ["info"],
   data() {
@@ -78,10 +79,17 @@ export default {
         status: 1,
       },
       imageUrl: "",
-      cateList: [],
     };
   },
+  computed:{
+    ...mapGetters({
+      cateList:"cate/list"
+    })
+  },
   methods: {
+    ...mapActions({
+      reqList:"cate/reqList"
+    }),
     cancel() {
       if (!this.info.isAdd) {
         this.empty();
@@ -103,15 +111,31 @@ export default {
       this.imageUrl = URL.createObjectURL(file);
       this.user.img = file;
     },
+    checkProps() {
+      return new Promise((resolve) => {
+        if (this.user.pid ==="") {
+          erroralert("上级分类不能为空");
+          return;
+        }
+        if (this.user.catename == "") {
+          erroralert("分类名称不能为空");
+          return;
+        }
+        resolve();
+      });
+    },
     add() {
-      reqcateAdd(this.user).then((res) => {
+      this.checkProps().then(()=>{
+        reqcateAdd(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
           this.empty();
-          this.$emit("init");
+          this.reqList({istree:true})
         }
       });
+      })
+      
     },
     getOne(id) {
       reqcateGetOne(id).then((res) => {
@@ -123,7 +147,8 @@ export default {
       });
     },
     edit() {
-      reqcateEdit(this.user).then((res) => {
+      this.checkProps().then(()=>{
+           reqcateEdit(this.user).then((res) => {
         if (res.data.code == 200) {
           successAlert(res.data.msg);
           this.cancel();
@@ -131,14 +156,8 @@ export default {
           this.$emit("init");
         }
       });
+      })
     },
-  },
-  mounted() {
-    reqcateList().then((res) => {
-      if (res.data.code == 200) {
-        this.cateList = res.data.list;
-      }
-    });
   },
 };
 </script>

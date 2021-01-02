@@ -6,8 +6,6 @@
       :closed="cancel"
     >
       <el-form :model="form">
-        <div>form:{{ form }}</div>
-        <div>attrsArr:{{ attrsArr }}</div>
         <el-form-item label="规格名称" label-width="120px">
           <el-input v-model="form.specsname" autocomplete="off"></el-input>
         </el-form-item>
@@ -60,8 +58,8 @@
 </template>
 
 <script>
-import { reqSpecsAdd, reqSpecsGetOne,reqSpecsEdit } from "@/utils/http";
-import { successAlert } from "@/utils/alert";
+import { reqSpecsAdd, reqSpecsGetOne, reqSpecsEdit } from "@/utils/http";
+import { successAlert, erroralert } from "@/utils/alert";
 import { mapGetters, mapActions } from "vuex";
 export default {
   props: ["info"],
@@ -101,42 +99,62 @@ export default {
       };
       this.attrsArr = [{ value: "" }];
     },
-    add() {
-      this.form.attrs = JSON.stringify(this.attrsArr.map((item) => item.value));
-      reqSpecsAdd(this.form).then((res) => {
-        if (res.data.code == 200) {
-          this.cancel();
-          this.empty();
-          successAlert(res.data.msg);
-          this.reqList();
-          this.reqTotal();
+    checkProps() {
+      return new Promise((resolve) => {
+        if (this.form.specsname == "") {
+          erroralert("规格名称不能为空");
+          return;
         }
+        if (this.attrsArr.some((item) => item.value == "")) {
+          erroralert("规格属性不能为空");
+          return;
+        }
+        resolve();
+      });
+    },
+    add() {
+      this.checkProps().then(() => {
+        this.form.attrs = JSON.stringify(
+          this.attrsArr.map((item) => item.value)
+        );
+        reqSpecsAdd(this.form).then((res) => {
+          if (res.data.code == 200) {
+            this.cancel();
+            this.empty();
+            successAlert(res.data.msg);
+            this.reqList();
+            this.reqTotal();
+          }
+        });
       });
     },
     getOne(id) {
       reqSpecsGetOne(id).then((res) => {
         if (res.data.code == 200) {
-          this.form = res.data.list[0]
-          this.form.attrs = JSON.parse(this.form.attrs)
-          this.attrsArr = this.form.attrs.map(item=>{
-            return {value:item}
-          })
+          this.form = res.data.list[0];
+          this.form.attrs = JSON.parse(this.form.attrs);
+          this.attrsArr = this.form.attrs.map((item) => {
+            return { value: item };
+          });
         }
       });
     },
     update() {
-      this.form.attrs= JSON.stringify(this.attrsArr.map(item=>item.value))
-      reqSpecsEdit(this.form).then(res=>{
-        if(res.data.code==200){
-            successAlert(res.data.msg)
-            this.cancel()
-            this.empty()
-            this.reqTotal()
-        }
-      })
+      this.checkProps().then(() => {
+        this.form.attrs = JSON.stringify(
+          this.attrsArr.map((item) => item.value)
+        );
+        reqSpecsEdit(this.form).then((res) => {
+          if (res.data.code == 200) {
+            successAlert(res.data.msg);
+            this.cancel();
+            this.empty();
+            this.reqTotal();
+          }
+        });
+      });
     },
   },
- 
 };
 </script>
 

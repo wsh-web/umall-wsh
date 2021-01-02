@@ -7,7 +7,6 @@
       @opened="opened"
     >
       <el-form :model="user">
-        {{ user }}
         <el-form-item label="一级分类" label-width="120px">
           <el-select v-model="user.first_cateid" @change="changeFirstCateId">
             <el-option label="--请选择--" value="" disabled></el-option>
@@ -293,13 +292,11 @@ export default {
     },
     edit() {
      this.checkProps().then(() => {
-      
         this.user.description = this.editor.txt.html();
         let data = {
           ...this.user,
           specsattr: JSON.stringify(this.user.specsattr)
         };
-
         reqgoodsUpdate(data).then(res => {
           if (res.data.code == 200) {
             this.cancel();
@@ -319,7 +316,7 @@ export default {
   },
   mounted() {
     if (this.cateList.length === 0) {
-      this.reqCateList();
+      this.reqCateList({istree:true});
     }
 
     this.reqSpecsList(true);

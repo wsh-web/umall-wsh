@@ -15,6 +15,7 @@
 import vAdd from "./components/add";
 import vList from "./components/list";
 import { reqcateList } from "@/utils/http";
+import {mapGetters,mapActions} from "vuex"
 export default {
   components: {
     vAdd,
@@ -26,29 +27,32 @@ export default {
         ishow: false,
         isAdd: true,
       },
-      list: [],
     };
   },
+  computed:{
+    ...mapGetters({
+      list:'cate/list'
+    })
+  },
   methods: {
+    ...mapActions({
+      reqList:"cate/reqList"
+    }),
     willAdd() {
       this.info.ishow = true;
-    },
-    init() {
-      reqcateList({ istree: true }).then((res) => {
-        if (res.data.code == 200) {
-          this.list = res.data.list;
-        }
-      });
     },
     edit(id) {
       this.info.ishow = true;
       this.info.isAdd = false;
       this.$refs.add.getOne(id);
     },
+    init(){
+      this.reqList({istree:true})
+    }
   },
-  mounted() {
-    this.init();
-  },
+  mounted(){
+    this.reqList({istree:true})
+  }
 };
 </script>
 
